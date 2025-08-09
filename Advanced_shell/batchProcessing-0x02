@@ -20,3 +20,50 @@ for pokemon in "${pokemon_list[@]}"; do
     # Delay to avoid hitting API rate limits
     sleep 2
 done
+
+# Directory to store fetched Pokémon data
+output_dir="pokemon_data"
+mkdir -p "$output_dir"
+
+# Error log file
+error_log="errors.txt"
+> "$error_log"  # Clear old log
+
+# List of Pokémon to fetch
+pokemon_list=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+
+# Function to fetch data with retry logic
+fetch_pokemon() {
+    local pokemon="$1"
+    local retries=3
+    local attempt=1
+    local success=false
+
+    echo "Fetching data for $pokemon..."
+
+    while [ $attempt -le $retries ]; do
+        if curl -s -f "https://pokeapi.co/api/v2/pokemon/$pokemon" -o "$output_dir/${pokemon}.json"; then
+            echo "Saved data to $output_dir/${pokemon}.json "
+            success=true
+            break
+        else
+            echo "Attempt $attempt for $pokemon failed. Retrying..."
+            sleep 2
+        fi
+        attempt=$((attempt + 1))
+    done
+
+    if [ "$success" = false ]; then
+        echo " Failed to fetch data for $pokemon after $retries attempts" | tee -a "$error_log"
+    fi
+}
+
+# Main loop to fetch all Pokémon with delay to avoid rate-limiting
+for pokemon in "${pokemon_list[@]}"; do
+    fetch_pokemon "$pokemon"
+    sleep 1  # Delay between requests
+done
+
+echo ""
+echo "Batch processing completed."
+echo "Errors (if any) are logged in $error_log"
