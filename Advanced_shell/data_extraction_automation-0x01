@@ -2,8 +2,8 @@
 # Extract data from data.json
 name=$(jq -r '.name' data.json | sed 's/.*/\u&/')
 type=$(jq -r '.types[0].type.name' data.json | sed 's/.*/\u&/')
-weight=$(jq -r '.weight' data.json | awk '{printf "%.1f", $1 / 10}')
-height=$(jq -r '.height' data.json | awk '{printf "%.1f", $1 / 10}')
+formatted_weight=$(jq -r '.weight' data.json | awk '{printf "%.1f", $1 / 10}')
+formatted_height=$(jq -r '.height' data.json | awk '{printf "%.1f", $1 / 10}')
 
-# Required exact format
-echo "$name is of type $type, weighs ${weight}kg, and is ${height}m tall."
+# EXACT required format
+echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
