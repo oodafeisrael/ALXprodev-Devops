@@ -1,7 +1,9 @@
 #!/bin/bash
+# Extract data from data.json
 name=$(jq -r '.name' data.json | sed 's/.*/\u&/')
-height=$(jq '.height' data.json | awk '{print $1/10}')
-weight=$(jq '.weight' data.json | awk '{print $1/10}')
 type=$(jq -r '.types[0].type.name' data.json | sed 's/.*/\u&/')
+weight=$(jq -r '.weight' data.json | awk '{printf "%.1f", $1 / 10}')
+height=$(jq -r '.height' data.json | awk '{printf "%.1f", $1 / 10}')
 
+# Required exact format
 echo "$name is of type $type, weighs ${weight}kg, and is ${height}m tall."
