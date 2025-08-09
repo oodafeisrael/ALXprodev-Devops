@@ -1,17 +1,13 @@
 #!/bin/bash
 
-# Directory to store fetched Pokémon data
 output_dir="pokemon_data"
 mkdir -p "$output_dir"
 
-# Error log file
 error_log="errors.txt"
-> "$error_log"  # Clear old log
+> "$error_log"
 
-# List of Pokémon to fetch
 pokemon_list=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
 
-# Function to fetch Pokémon data
 fetch_pokemon() {
     local pokemon="$1"
     if curl -s -f "https://pokeapi.co/api/v2/pokemon/$pokemon" -o "$output_dir/${pokemon}.json"; then
@@ -23,16 +19,30 @@ fetch_pokemon() {
 
 echo "Fetching Pokémon data in parallel..."
 
-# Loop through and start each request in the background
+# Launch all jobs in background
 for pokemon in "${pokemon_list[@]}"; do
     echo "Fetching data for $pokemon..."
     fetch_pokemon "$pokemon" &
 done
 
-# Wait for all background processes to complete
+# Show current background jobs
+echo ""
+echo " Current background jobs:"
+jobs
+
+# Optional: kill jobs if they exceed a certain time limit (example: 15 seconds)
+sleep 15
+for job in $(jobs -p); do
+    if kill -0 "$job" 2>/dev/null; then
+        echo " Job $job took too long — killing..."
+        kill "$job"
+    fi
+done
+
+# Wait for remaining jobs to finish
 wait
 
 echo ""
-echo " All parallel fetch operations completed."
+echo " Parallel fetch completed."
 echo " Data saved in $output_dir"
-echo " Errors (if any) are logged in $error_log"
+echo " Errors (if any) are in $error_log"
